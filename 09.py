@@ -17,73 +17,58 @@
 
 from typing import List, Literal
 
-def move_reno(board: str, moves: str) -> Literal['fail', 'crash', 'success']:
-    board = board.split("\n")
-    board = board[1:-1]
 
-    for move in moves:
-        match move:
-            case 'U':
-                for row in board:
-                    if '@' in row:
-                        col = row.index('@')
-                        new_row = board.index(row) - 1
-                        if new_row < 0:
-                            return 'crash'
-                        if board[new_row][col] == '#':
-                            return 'crash'
-                        elif board[new_row][col] == '*':
-                            return 'success'
-                        else:
-                            board[board.index(row)] = row[:col] + '.' + row[col+1:]
-                            board[new_row] = board[new_row][:col] + '@' + board[new_row][col+1:]
-                        break
-            case 'D':
-                for row in board:
-                    if '@' in row:
-                        col = row.index('@')
-                        new_row = board.index(row) + 1
-                        if new_row > board.index(board[-1]):
-                            return 'crash'
-                        if board[new_row][col] == '#':
-                            return 'crash'
-                        elif board[new_row][col] == '*':
-                            return 'success'
-                        else:
-                            board[board.index(row)] = row[:col] + '.' + row[col+1:]
-                            board[new_row] = board[new_row][:col] + '@' + board[new_row][col+1:]
-                        break
-            case 'R':
-                for row in board:
-                    if '@' in row:
-                        col = row.index('@')
-                        new_col = row.index('@') + 1
-                        if new_col > row.index(row[-1]):
-                            return 'crash'
-                        if board[new_row][col] == '#':
-                            return 'crash'
-                        elif board[new_row][col] == '*':
-                            return 'success'
-                        else:
-                            board[board.index(row)] = row[:col] + '.' + row[col+1:]
-                            board[new_row] = board[new_row][:col] + '@' + board[new_row][col+1:]
-                        break
-            case 'L':
-                for row in board:
-                    if '@' in row:
-                        col = row.index('@')
-                        new_col = row.index('@') - 1
-                        if new_col < 0:
-                            return 'crash'
-                        if board[new_row][col] == '#':
-                            return 'crash'
-                        elif board[new_row][col] == '*':
-                            return 'success'
-                        else:
-                            board[board.index(row)] = row[:col] + '.' + row[col+1:]
-                            board[new_row] = board[new_row][:col] + '@' + board[new_row][col+1:]
-                        break
-    print(board)
+def move_reno(board: str, moves: str) -> str:
+    rows = [line for line in board.split('\n') if line.strip() != '']
+    if not rows:
+        return 'fail'
+
+    height = len(rows)
+    width = len(rows[0])
+
+    start_row, start_col = -1, -1
+    for r in range(height):
+        c = rows[r].find('@')
+        if c != -1:
+            start_row, start_col = r, c
+            break
+
+    if start_row == -1:
+        # No hay reno en el tablero
+        return 'fail'
+
+    delta = {
+        'U': (-1, 0),
+        'D': ( 1, 0),
+        'L': ( 0,-1),
+        'R': ( 0, 1)
+    }
+
+    r, c = start_row, start_col
+
+    def is_out(rr, cc):
+        return rr < 0 or rr >= height or cc < 0 or cc >= width
+
+    for step in moves:
+        if step not in delta:
+            continue
+
+        dr, dc = delta[step]
+        nr, nc = r + dr, c + dc
+
+        if is_out(nr, nc):
+            return 'crash'
+
+        cell = rows[nr][nc]
+
+        if cell == '#':
+            return 'crash'
+
+        r, c = nr, nc
+
+        if cell == '*':
+            return 'success'
+
     return 'fail'
 
 # Ejemplos:
